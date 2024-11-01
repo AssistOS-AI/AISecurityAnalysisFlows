@@ -5,7 +5,9 @@ class GenerateTemplate extends IFlow {
         action: "Generate a Book Template",
         intent: "Generates a Book Template"
     };
-
+    // project-name
+    // github-link
+    // project-prompt
     static flowParametersSchema = {
         title: {
             type: "string",
@@ -23,7 +25,6 @@ class GenerateTemplate extends IFlow {
 
     async userCode(apis, parameters) {
         try {
-
             const llmModule = apis.loadModule("llm");
             const documentModule = apis.loadModule("document");
 
@@ -84,7 +85,7 @@ class GenerateTemplate extends IFlow {
                     ` which will be used to create a book. Your response should match this json schema: ${JSON.stringify(generationTemplateStructure)}.
                     Under no circumstance should your response include any other information than the json response schema.
                     Please give me a JSON response without including any code blocks or the \`\`\`json syntax.`;
-                const specialInstructions = `Special Configuration: ${generalLlmInfo}`;
+                const specialInstructions = `Special Configuration: ${generalLlmInfo}, Under no circumstance should your response include less then 10 chapters`;
                 const bookDataInstructions = `Book Generation Specifications: ${bookGenerationInfo}`;
                 const bookInfo = `Book data: ${JSON.stringify(bookData)}`;
 
@@ -128,7 +129,7 @@ class GenerateTemplate extends IFlow {
             const bookData = parameters.configs;
 
             const documentObj = {
-                title: `template_${bookData.title}`,
+                title: `template_${bookData["project-name"]}`,
                 abstract: JSON.stringify({
                     ...bookData,
                     generationInfo: bookGenerationInfo,
@@ -150,29 +151,29 @@ class GenerateTemplate extends IFlow {
 
             const chapters = JSON.parse(chaptersJsonString);
             for (const chapter of chapters.chapters) {
-                    const chapterObj = {
-                        title: chapter.title,
-                        idea: chapter.idea,
+                const chapterObj = {
+                    title: chapter.title,
+                    idea: chapter.idea,
+                };
+                const chapterId = await documentModule.addChapter(parameters.spaceId, documentId, chapterObj);
+
+                const paragraphsPrompt = createParagraphsPrompt(generationTemplateParagraphs, bookData, chapter, bookGenerationInfo, generalLlmInfo);
+
+                const llmResponse = await llmModule.sendLLMRequest({
+                    prompt: paragraphsPrompt,
+                    modelName: "GPT-4o"
+                }, parameters.spaceId);
+
+                const paragraphsJsonString = await ensureValidJson(llmResponse.messages[0], 5, generationTemplateParagraphs);
+                const paragraphsData = JSON.parse(paragraphsJsonString);
+
+                for (const paragraph of paragraphsData.paragraphs) {
+                    const paragraphObj = {
+                        text: paragraph.idea,
                     };
-                    const chapterId = await documentModule.addChapter(parameters.spaceId, documentId, chapterObj);
-
-                    const paragraphsPrompt = createParagraphsPrompt(generationTemplateParagraphs, bookData, chapter, bookGenerationInfo, generalLlmInfo);
-
-                    const llmResponse = await llmModule.sendLLMRequest({
-                        prompt: paragraphsPrompt,
-                        modelName: "GPT-4o"
-                    }, parameters.spaceId);
-
-                    const paragraphsJsonString = await ensureValidJson(llmResponse.messages[0], 5, generationTemplateParagraphs);
-                    const paragraphsData = JSON.parse(paragraphsJsonString);
-
-                    for (const paragraph of paragraphsData.paragraphs) {
-                        const paragraphObj = {
-                            text: paragraph.idea,
-                        };
-                        await documentModule.addParagraph(parameters.spaceId, documentId, chapterId, paragraphObj);
-                    }
+                    await documentModule.addParagraph(parameters.spaceId, documentId, chapterId, paragraphObj);
                 }
+            }
         } catch (e) {
             apis.fail(e);
         }
