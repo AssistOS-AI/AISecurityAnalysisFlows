@@ -81,10 +81,9 @@ class GenerateTemplate extends IFlow {
             };
 
             const createChaptersPrompt = (generationTemplateStructure, bookData, bookGenerationInfo, generalLlmInfo) => {
-                const base = "You're a book content Manager. Your purpose is to generate a book schema template based on user specifications" +
-                    ` which will be used to create a book. Your response should match this json schema: ${JSON.stringify(generationTemplateStructure)}.
-                    Under no circumstance should your response include any other information than the json response schema.
-                    Please give me a JSON response without including any code blocks or the \`\`\`json syntax.`;
+                const base = "You're a security content manager. Your purpose is to generate a security scan plan template for a web application" +
+                    ` based on user specifications, which will be used to conduct a security analysis. Your response should match this JSON schema: ${JSON.stringify(generationTemplateStructure)}. ` +
+                    "Under no circumstance should your response include any other information than the JSON response schema. Please provide a JSON response without code blocks or the ```json syntax.";
                 const specialInstructions = `Special Configuration: ${generalLlmInfo}, Under no circumstance should your response include less then 10 chapters`;
                 const bookDataInstructions = `Book Generation Specifications: ${bookGenerationInfo}`;
                 const bookInfo = `Book data: ${JSON.stringify(bookData)}`;
@@ -93,9 +92,9 @@ class GenerateTemplate extends IFlow {
             };
 
             const createParagraphsPrompt = (generationTemplateStructure, bookData, chapterData, bookGenerationInfo, generalLlmInfo) => {
-                const base = "You're a book content Manager. Your purpose is to generate a list of paragraphs based on user specifications" +
-                    ` which will be part of a chapter used to create a book. Your response should match this json schema: ${JSON.stringify(generationTemplateStructure)}.
-                    But keep in mind that the number of paragraphs is variable and can be as many as you think is best for the chapter (even 1000).`;
+                const base = "You're a security content manager. Your purpose is to generate detailed content for each chapter based on user specifications" +
+                    ` to be part of a security scan plan for a web application. Your response should match this JSON schema: ${JSON.stringify(generationTemplateStructure)}.` +
+                " Remember, the number of paragraphs can vary and should be based on the complexity of the topic, allowing up to 1000 paragraphs if necessary.";
                 const specialInstructions = `Special Configuration: ${generalLlmInfo}`;
                 const bookDataInstructions = `General Book Generation Specifications: ${bookGenerationInfo}`;
                 const bookInfo = `Book data: ${JSON.stringify(bookData)}`;
