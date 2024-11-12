@@ -53,7 +53,7 @@ class GeneratePlan extends IFlow {
                         if (jsonSchema !== null) {
                             const prompt = `Please correct the following JSON to match the schema ${JSON.stringify(jsonSchema)}:
                              ${jsonString}. Only respond with a valid Json that doesn't contain any code blocks or the \`\`\`json syntax.`;
-                            const response = await llmModule.sendLLMRequest({
+                            const response = await llmModule.generateText({
                                 prompt,
                                 modelName: "GPT-4o"
                             }, parameters.spaceId);
@@ -141,7 +141,7 @@ class GeneratePlan extends IFlow {
 
             const chaptersPrompt = createChaptersPrompt(generationTemplateChapters, bookData, bookGenerationInfo, generalLlmInfo);
 
-            const llmResponse = await llmModule.sendLLMRequest({
+            const llmResponse = await llmModule.generateText({
                 prompt: chaptersPrompt,
                 modelName: "GPT-4o"
             }, parameters.spaceId);
@@ -158,7 +158,7 @@ class GeneratePlan extends IFlow {
 
                 const paragraphsPrompt = createParagraphsPrompt(generationTemplateParagraphs, bookData, chapter, bookGenerationInfo, generalLlmInfo);
 
-                const llmResponse = await llmModule.sendLLMRequest({
+                const llmResponse = await llmModule.generateText({
                     prompt: paragraphsPrompt,
                     modelName: "GPT-4o"
                 }, parameters.spaceId);
