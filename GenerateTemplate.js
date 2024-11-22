@@ -54,11 +54,8 @@ class GenerateTemplate extends IFlow {
                         if (jsonSchema !== null) {
                             const prompt = `Please correct the following JSON to match the schema ${JSON.stringify(jsonSchema)}:
                              ${jsonString}. Only respond with a valid Json that doesn't contain any code blocks or the \`\`\`json syntax.`;
-                            const response = await llmModule.generateText({
-                                prompt,
-                                modelName: "GPT-4o"
-                            }, parameters.spaceId);
-                            return response.messages[0];
+                            const response= await llmModule.generateText(parameters.spaceId, prompt, parameters.personality)
+                            return response.message;
                         }
                         return jsonString;
                     }
@@ -141,12 +138,8 @@ class GenerateTemplate extends IFlow {
 
             const chaptersPrompt = createChaptersPrompt(generationTemplateChapters, bookData, bookGenerationInfo, generalLlmInfo);
 
-            const llmResponse = await llmModule.generateText({
-                prompt: chaptersPrompt,
-                modelName: "GPT-4o"
-            }, parameters.spaceId);
-
-            const chaptersJsonString = await ensureValidJson(llmResponse.messages[0], 5, generationTemplateChapters);
+            const llmResponse = await llmModule.generateText(parameters.spaceId, chaptersPrompt, parameters.personality)
+            const chaptersJsonString = await ensureValidJson(llmResponse.message, 5, generationTemplateChapters);
 
             const chapters = JSON.parse(chaptersJsonString);
             for (const chapter of chapters.chapters) {
@@ -157,13 +150,8 @@ class GenerateTemplate extends IFlow {
                 const chapterId = await documentModule.addChapter(parameters.spaceId, documentId, chapterObj);
 
                 const paragraphsPrompt = createParagraphsPrompt(generationTemplateParagraphs, bookData, chapter, bookGenerationInfo, generalLlmInfo);
-
-                const llmResponse = await llmModule.generateText({
-                    prompt: paragraphsPrompt,
-                    modelName: "GPT-4o"
-                }, parameters.spaceId);
-
-                const paragraphsJsonString = await ensureValidJson(llmResponse.messages[0], 5, generationTemplateParagraphs);
+                const llmResponse = await llmModule.generateText(parameters.spaceId, paragraphsPrompt, parameters.personality)
+                const paragraphsJsonString = await ensureValidJson(llmResponse.message, 5, generationTemplateParagraphs);
                 const paragraphsData = JSON.parse(paragraphsJsonString);
 
                 for (const paragraph of paragraphsData.paragraphs) {
