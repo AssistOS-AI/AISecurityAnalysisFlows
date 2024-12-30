@@ -1,6 +1,6 @@
 const IFlow = require('assistos').loadModule('flow', {}).IFlow;
 
-class GenerateTemplate extends IFlow {
+class GenerateTemplateSecurity extends IFlow {
     static flowMetadata = {
         action: "Generate a Book Template",
         intent: "Generates a Book Template"
@@ -167,4 +167,4 @@ class GenerateTemplate extends IFlow {
     }
 }
 
-module.exports = GenerateTemplate;
+module.exports = GenerateTemplateSecurity;
